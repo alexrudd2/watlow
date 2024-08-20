@@ -44,7 +44,13 @@ jobs:
         ruff check .
     - name: Check types with mypy
       run: |
-         mypy watlow
+        if [ ${{ matrix.pymodbus-version }} == "2.5.3" ] || \
+           [ ${{ matrix.pymodbus-version }} == "3.0.2" ] || \
+           [ ${{ matrix.pymodbus-version }} == "3.1.3" ]; then
+          mypy watlow --ignore-missing-imports
+        else
+          mypy watlow
+        fi
     - name: Pytest
       run: |
         pytest
