@@ -53,7 +53,7 @@ Homepage = "https://github.com/alexrudd2/watlow/"
 Issues = "https://github.com/alexrudd2/watlow/issues"
 
 [tool.ruff]
-exclude = ["venv*"]
+extend-exclude = ["venv*"]
 line-length = 99
 
 [tool.ruff.lint]
