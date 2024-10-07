@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "watlow"
-version = "0.7.0"
+version = "0.8.0"
 description="Python driver for Watlow EZ-Zone temperature controllers."
 dependencies = [
   "pymodbus>=2.4.0; python_version == '3.9'",
