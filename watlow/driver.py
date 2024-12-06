@@ -165,7 +165,7 @@ class TemperatureController:
             logging.debug('Formatted Request: ' + str(bytes.hex(request)))
             self.connection.write(request)
             response = self.connection.read(length)
-        except serial.serialutil.SerialException:
+        except serial.serialutil.SerialException:  # type: ignore
             return self._write_and_read(request, length, check, retries - 1)
         match = check.match(bytes.hex(response))
         logging.debug('Formatted Response: ' + str(bytes.hex(response)))
@@ -196,13 +196,14 @@ class Gateway(AsyncioModbusClient):
 
         For more information on a 'Zone', refer to Watlow manuals.
         """
-        output: dict[str, int | None] = {
+        addresses = {
             'actual': self.actual_temp_address,
             'setpoint': self.setpoint_address,
             'output': self.output_address,
         }
         endian = Endian.BIG if self.pymodbus35plus else Endian.big  # type: ignore[attr-defined]
-        for k, v in output.items():
+        output: dict[str, float | None] = {}
+        for k, v in addresses.items():
             address = (zone - 1) * self.modbus_offset + v
             try:
                 result = await self.read_registers(address, 2)

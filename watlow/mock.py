@@ -26,7 +26,7 @@ class Gateway(realGateway):
     def __init__(self, *args, max_temp=220, **kwargs):
         """Set random data."""
         self.setpoint_range = (10, max_temp)
-        self.state = {i: {'actual': 25, 'setpoint': 25, 'output': 0} for i in range(1, 9)}
+        self.state = {i: {'actual': 25.0, 'setpoint': 25.0, 'output': 0.0} for i in range(1, 9)}
         self.client = AsyncClientMock()
 
     def __getattr__(self, attr):
@@ -45,7 +45,7 @@ class Gateway(realGateway):
                 temps['actual'] -= 1
                 temps['output'] = 0
 
-    async def get(self, zone):
+    async def get(self, zone):  # type: ignore
         """Return a mock state with the same object structure."""
         await asyncio.sleep(random() * 0.25)
         self._perturb()
