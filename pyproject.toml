@@ -63,7 +63,7 @@ ignore = [
   "D107",     # Missing docstring in __init__
 ]
 select = [
-    # "B",   # bandit
+    "B",   # flake8-bugbear
     "C",   # complexity
     "D",   # docstrings
     "E",   # pycodestyle errors
