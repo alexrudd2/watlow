@@ -3,6 +3,9 @@
 
 name: watlow
 
+permissions:
+  contents: read
+
 on:
   push:
     branches: [ "master" ]
