@@ -49,7 +49,7 @@ jobs:
     - name: Install dependencies
       run: |
         uv sync --all-extras
-        uv pip install pymodbus==${{ matrix.pymodbus-version }}
+        uv add pymodbus==${{ matrix.pymodbus-version }}
     - name: Lint with ruff
       run: |
         uv run ruff check .
