@@ -89,3 +89,7 @@ check_untyped_defs = true
 
 [tool.pytest.ini_options]
 addopts = "--cov=watlow"
+
+[tool.pyright]
+venvPath = "."
+venv = ".venv"
