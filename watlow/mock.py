@@ -62,6 +62,7 @@ class Gateway(realGateway):
 
     def _read_float(self, addr: int) -> float:
         regs = self._registers.getValues(addr, 2)
+        assert isinstance(regs, list)
         packed = struct.pack('>HH', regs[0], regs[1])
         return struct.unpack('>f', packed)[0]
 
@@ -95,7 +96,8 @@ class Gateway(realGateway):
         if method == 'read_holding_registers':
             regs = self._registers.getValues(address, count)
             if pymodbus38plus:
-                return ReadHoldingRegistersResponse(registers=regs)
+                assert isinstance(regs, list)
+                return ReadHoldingRegistersResponse(registers=regs)  # type: ignore
             return ReadHoldingRegistersResponse(regs)  # type: ignore
 
         if method == 'write_registers':
