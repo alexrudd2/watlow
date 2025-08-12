@@ -78,7 +78,7 @@ class TemperatureController:
                           '([0-9a-f]{8})([0-9a-f]{4})$')
     }
 
-    def __init__(self, port, timeout=0.5):
+    def __init__(self, port: str, timeout:float = 0.5) -> None:
         """Open up a serial connection to the controller.
 
         This device uses RS-422 instead of RS-232. You will likely need a
@@ -89,7 +89,7 @@ class TemperatureController:
         self.timeout = timeout
         self.connection = self.open()
 
-    def open(self):
+    def open(self) -> serial.Serial:
         """Open up a serial connection to the oven."""
         return serial.Serial(
             self.port,
@@ -97,12 +97,12 @@ class TemperatureController:
             timeout=self.timeout
         )
 
-    def close(self):
+    def close(self) -> None:
         """Close the serial connection. Use on cleanup."""
         self.connection.flush()
         self.connection.close()
 
-    def get(self):
+    def get(self) -> dict:
         """Get the current temperature and setpoint, in C."""
         preamble = unhexlify('55ff')
         output = {'actual': None, 'setpoint': None}
@@ -121,7 +121,7 @@ class TemperatureController:
             )
         return output
 
-    def set(self, setpoint):
+    def set(self, setpoint: float) -> None:
         """Set the setpoint temperature, in C."""
         preamble = unhexlify('55ff')
         header = self.commands['set']['header']
@@ -180,7 +180,7 @@ class TemperatureController:
 class Gateway(AsyncioModbusClient):
     """Watlow communication using their EZ-Zone Modbus Gateway."""
 
-    def __init__(self, address, timeout=1, modbus_offset=5000, max_temp=220):
+    def __init__(self, address, timeout=1, modbus_offset=5000, max_temp=220) -> None:
         """Open connection to gateway."""
         super().__init__(address, timeout)
         self.modbus_offset = modbus_offset
@@ -189,7 +189,7 @@ class Gateway(AsyncioModbusClient):
         self.output_address = 1904
         self.setpoint_range = (10, max_temp)
 
-    async def get(self, zone: int):
+    async def get(self, zone: int) -> dict[str, float | None]:
         """Get oven data for a zone.
 
         For more information on a 'Zone', refer to Watlow manuals.
@@ -211,7 +211,7 @@ class Gateway(AsyncioModbusClient):
                 output[k] = None
         return output
 
-    async def set_setpoint(self, zone: int, setpoint: float):
+    async def set_setpoint(self, zone: int, setpoint: float) -> None:
         """Set the temperature setpoint for a zone.
 
         For more information on a 'Zone', refer to Watlow manuals.

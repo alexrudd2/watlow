@@ -3,11 +3,13 @@
 Distributed under the GNU General Public License v2
 Copyright (C) 2019 NuMat Technologies
 """
+from typing import Any
+
 from watlow import mock  # noqa: F401
 from watlow.driver import Gateway, TemperatureController
 
 
-def command_line(args=None):
+def command_line(args: Any = None) -> None:
     """CLI interface, accessible when installed through pip."""
     import argparse
     import asyncio
@@ -24,7 +26,7 @@ def command_line(args=None):
                         help="Specify zone in case of gateway")
     args = parser.parse_args(args)
 
-    async def run():
+    async def run() -> None:
         async with Gateway(args.port) as gateway:
             if args.set_setpoint:
                 await gateway.set_setpoint(args.zone, args.set_setpoint)
