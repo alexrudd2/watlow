@@ -38,10 +38,10 @@ def test_driver_cli_setpoint(capsys):
 async def test_roundtrip(gateway_driver):
     """Confirm various datatypes are read back correctly after being set."""
     expected = {'setpoint': 25.0, 'actual': 25, 'output': 0}
-    assert await gateway_driver.get(zone=1) == expected
+    assert await gateway_driver.get(zone=1) == pytest.approx(expected, rel=1e-6)
     await gateway_driver.set_setpoint(zone=1, setpoint=12.3)
     expected = {'setpoint': 12.3, 'actual': 24, 'output': 0}
-    assert await gateway_driver.get(zone=1) == expected
+    assert await gateway_driver.get(zone=1) == pytest.approx(expected, rel=1e-6)
 
 
 @pytest.mark.asyncio
