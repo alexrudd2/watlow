@@ -8,21 +8,14 @@ from pymodbus.datastore import ModbusSparseDataBlock
 from watlow.driver import Gateway as realGateway
 
 try:
-    from pymodbus.pdu.register_message import (  # type: ignore
-        ReadHoldingRegistersResponse,
-        WriteMultipleRegistersResponse,
-    )
+    from pymodbus.pdu.register_message import ReadHoldingRegistersResponse  # type: ignore
     pymodbus38plus = True
 except ImportError:
     pymodbus38plus = False
     try:  # pymodbus 3.7.x
         from pymodbus.pdu.register_read_message import ReadHoldingRegistersResponse  # type: ignore
-        from pymodbus.pdu.register_write_message import (  # type: ignore
-            WriteMultipleRegistersResponse,
-        )
     except ImportError:
         from pymodbus.register_read_message import ReadHoldingRegistersResponse  # type: ignore
-        from pymodbus.register_write_message import WriteMultipleRegistersResponse  # type: ignore
 
 class AsyncClientMock(MagicMock):
     """Magic mock that works with async methods."""
@@ -104,6 +97,6 @@ class Gateway(realGateway):
             for i, val in enumerate(count):
                 self._registers.setValues(address + i, val)
             self._perturb()
-            return WriteMultipleRegistersResponse(address, count)
+            return
 
         raise NotImplementedError(f'Unrecognised method: {method}')
