@@ -3,6 +3,8 @@
 import struct
 from unittest.mock import MagicMock
 
+from pymodbus.datastore import ModbusSparseDataBlock
+
 from watlow.driver import Gateway as realGateway
 
 try:
@@ -45,9 +47,9 @@ class Gateway(realGateway):
         self.setpoint_address = 2160
         self.output_address = 1904
         self.modbus_offset = 5000
-        self._registers: dict[int, int] = {}
 
-        # Initialize _registers with default 25.0 for actual/setpoint, 0.0 output
+        self._registers = ModbusSparseDataBlock({})
+        # Initialize each zone with 25.0 for actual/setpoint, 0.0 output
         for zone in range(1, 9):
             zone_offset = self.modbus_offset * (zone - 1)
             for addr, val in [
@@ -56,19 +58,16 @@ class Gateway(realGateway):
                 (self.output_address + zone_offset, 0.0),
             ]:
                 hi, lo = struct.unpack('>HH', struct.pack('>f', val))
-                self._registers[addr] = hi
-                self._registers[addr + 1] = lo
+                self._registers.setValues(addr, [hi, lo])
 
     def _read_float(self, addr: int) -> float:
-        hi = self._registers.get(addr, 0)
-        lo = self._registers.get(addr + 1, 0)
-        packed = struct.pack('>HH', hi, lo)
+        regs = self._registers.getValues(addr, 2)
+        packed = struct.pack('>HH', regs[0], regs[1])
         return struct.unpack('>f', packed)[0]
 
     def _write_float(self, addr: int, val: float):
         hi, lo = struct.unpack('>HH', struct.pack('>f', val))
-        self._registers[addr] = hi
-        self._registers[addr + 1] = lo
+        self._registers.setValues(addr, [hi, lo])
 
     def _perturb(self):
         for zone in range(1, 9):
@@ -94,14 +93,14 @@ class Gateway(realGateway):
 
     async def _request(self, method, address, count, **kwargs):
         if method == 'read_holding_registers':
-            regs = [self._registers.get(address + i, 0) for i in range(count)]
+            regs = self._registers.getValues(address, count)
             if pymodbus38plus:
                 return ReadHoldingRegistersResponse(registers=regs)
             return ReadHoldingRegistersResponse(regs)  # type: ignore
 
         if method == 'write_registers':
             for i, val in enumerate(count):
-                self._registers[address + i] = val
+                self._registers.setValues(address + i, val)
             self._perturb()
             return WriteMultipleRegistersResponse(address, count)
 
