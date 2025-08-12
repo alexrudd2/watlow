@@ -9,7 +9,6 @@ from typing import ClassVar
 
 import crcmod  # type: ignore
 import serial
-from pymodbus.payload import BinaryPayloadBuilder, BinaryPayloadDecoder
 
 from .util import AsyncioModbusClient
 
@@ -204,11 +203,10 @@ class Gateway(AsyncioModbusClient):
         for k, v in addresses.items():
             address = (zone - 1) * self.modbus_offset + v
             try:
-                result = await self.read_registers(address, 2)
-                output[k] = BinaryPayloadDecoder.fromRegisters(
-                    result,
-                    byteorder="big"
-                ).decode_32bit_float()
+                result = await self.read_registers(address, 2)  # returns [reg_hi, reg_lo]
+                # Pack as two unsigned shorts, then unpack as a big-endian float
+                raw_bytes = struct.pack('>HH', *result)
+                output[k] = struct.unpack('>f', raw_bytes)[0]
             except AttributeError:
                 output[k] = None
         return output
@@ -222,7 +220,9 @@ class Gateway(AsyncioModbusClient):
             raise ValueError(f"Setpoint ({setpoint}) is not in the valid range from"
                              f" {self.setpoint_range[0]} to {self.setpoint_range[1]}")
         address = (zone - 1) * self.modbus_offset + self.setpoint_address
-        builder = BinaryPayloadBuilder(byteorder="big")
-        builder.add_32bit_float(setpoint)
-        await self.write_registers(address, builder.build(),
-                                   skip_encode=True)
+
+        # Pack float into big-endian bytes, then split into two 16-bit registers
+        raw_bytes = struct.pack('>f', setpoint)
+        registers = struct.unpack('>HH', raw_bytes)
+
+        await self.write_registers(address, registers, skip_encode=True)
