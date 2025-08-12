@@ -224,5 +224,7 @@ class Gateway(AsyncioModbusClient):
         # Pack float into big-endian bytes, then split into two 16-bit registers
         raw_bytes = struct.pack('>f', setpoint)
         registers = struct.unpack('>HH', raw_bytes)
-
-        await self.write_registers(address, registers, skip_encode=True)
+        if hasattr(self.write_registers, 'skip_encode'):
+            await self.write_registers(address, registers, skip_encode=True)
+        else:
+            await self.write_registers(address, registers)
