@@ -31,7 +31,7 @@ class AsyncClientMock(MagicMock):
         """Convert regular mocks into into an async coroutine."""
         return super().__call__(*args, **kwargs)
 
-    def close(self):
+    async def close(self):
         """Close the connection."""
         ...
 
