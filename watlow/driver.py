@@ -75,7 +75,7 @@ class TemperatureController:
         'setpoint': re.compile('^55ff060010000b8802030107010108'
                                '([0-9a-f]{8})([0-9a-f]{4})$'),
         'set': re.compile('^55ff060010000a76020407010108'
-                          '([0-9a-f]{8})([0-9a-f]{4})$')
+                          '([0-9a-f]{8})([0-9a-f]{4})$'),
     }
 
     def __init__(self, port: str, timeout:float = 0.5) -> None:
@@ -94,7 +94,7 @@ class TemperatureController:
         return serial.Serial(
             self.port,
             self.baudrate,
-            timeout=self.timeout
+            timeout=self.timeout,
         )
 
     def close(self) -> None:
@@ -117,7 +117,7 @@ class TemperatureController:
             output[key] = self._write_and_read(
                 request=preamble + header + header_checksum[:1] + body + data_checksum,
                 length=21,
-                check=self.responses[key]
+                check=self.responses[key],
             )
         return output
 
@@ -133,7 +133,7 @@ class TemperatureController:
         response = self._write_and_read(
             request=preamble + header + header_checksum[:1] + body + data_checksum,
             length=20,
-            check=self.responses['set']
+            check=self.responses['set'],
         )
 
         # check setpoint versus response, if not the same raise an error
