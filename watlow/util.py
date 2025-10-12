@@ -21,7 +21,7 @@ class AsyncioModbusClient:
     including standard timeouts, async context manager, and queued requests.
     """
 
-    def __init__(self, address, timeout=1):
+    def __init__(self, address: str, timeout: float=1) -> None:
         """Set up communication parameters."""
         self.ip = address
         self.timeout = timeout
@@ -37,7 +37,7 @@ class AsyncioModbusClient:
         """Asynchronously connect with the context manager."""
         return self
 
-    async def __aexit__(self, *args):
+    async def __aexit__(self, *args) -> None:
         """Provide exit to the context manager."""
         await self._close()
 
@@ -57,11 +57,11 @@ class AsyncioModbusClient:
         except Exception as e:
             raise OSError(f"Could not connect to '{self.ip}'.") from e
 
-    async def read_coils(self, address, count):
+    async def read_coils(self, address: int, count: int):
         """Read modbus output coils (0 address prefix)."""
         return await self._request('read_coils', address, count)
 
-    async def read_registers(self, address, count):
+    async def read_registers(self, address: int, count: int) -> list:
         """Read modbus registers.
 
         The Modbus protocol doesn't allow responses longer than 250 bytes
@@ -77,24 +77,24 @@ class AsyncioModbusClient:
         registers += r.registers
         return registers
 
-    async def read_holding_registers(self, address, count):
+    async def read_holding_registers(self, address: int, count: int):
         """Read modbus holding registers."""
         await self._request('read_holding_registers', address, count)
 
-    async def write_coil(self, address, value):
+    async def write_coil(self, address: int, value):
         """Write a modbus coil."""
         await self._request('write_coil', address, value)
 
-    async def write_coils(self, address, values):
+    async def write_coils(self, address: int, values):
         """Write modbus coils."""
         await self._request('write_coils', address, values)
 
-    async def write_register(self, address, value, skip_encode=False):
+    async def write_register(self, address: int, value, skip_encode=False):
         """Write a modbus register."""
         return await self._request('write_register', address, value,
                                    skip_encode=skip_encode)
 
-    async def write_registers(self, address, values, skip_encode=False):
+    async def write_registers(self, address: int, values, skip_encode=False):
         """Write modbus registers.
 
         The Modbus protocol doesn't allow requests longer than 250 bytes

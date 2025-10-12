@@ -18,15 +18,13 @@ crc8 = crcmod.mkCrcFun(0b110000001)
 # CRC16 polynominal: X^16 + X^12 + X^5 + 1 (10001000000100001)
 crc16 = crcmod.mkCrcFun(0b10001000000100001)
 
-
-def f_to_c(f):
+def f_to_c(f: float) -> float:
     """Convert Fahrenheit to Celsius."""
     return (f - 32.0) / 1.8
 
-
-def c_to_f(c):
+def c_to_f(c: float) -> float:
     """Convert Celsius to Fahrenheit."""
-    return c * 1.8 + 32.0
+    return float(c * 1.8 + 32.0)
 
 
 class TemperatureController:
@@ -58,7 +56,7 @@ class TemperatureController:
      * Second checksum is a custom CRC-16 following Bacnet spec.
     """
 
-    commands: ClassVar[dict] = {
+    commands: ClassVar[dict[str, dict[str, bytes]]] = {
         'actual':
             {'header': unhexlify('0510000006'),
              'body':   unhexlify('010301040101')},
@@ -69,7 +67,7 @@ class TemperatureController:
             {'header': unhexlify('051000000a'),
              'body':   unhexlify('010407010108')},
     }
-    responses: ClassVar[dict] = {
+    responses: ClassVar[dict[str, re.Pattern[str]]] = {
         'actual': re.compile('^55ff060010000b8802030104010108'
                              '([0-9a-f]{8})([0-9a-f]{4})$'),
         'setpoint': re.compile('^55ff060010000b8802030107010108'
@@ -102,10 +100,10 @@ class TemperatureController:
         self.connection.flush()
         self.connection.close()
 
-    def get(self) -> dict:
+    def get(self) -> dict[str, float | None]:
         """Get the current temperature and setpoint, in C."""
         preamble = unhexlify('55ff')
-        output = {'actual': None, 'setpoint': None}
+        output: dict[str, float | None ] = {'actual': None, 'setpoint': None}
         for key in output:
             header = self.commands[key]['header']
             body = self.commands[key]['body']
