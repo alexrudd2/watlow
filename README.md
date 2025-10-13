@@ -9,7 +9,7 @@ Installation
 ============
 
 ```
-pip install watlow
+uv install watlow
 ```
 
 Usage
