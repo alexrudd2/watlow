@@ -7,7 +7,7 @@ import struct
 from binascii import unhexlify
 from typing import ClassVar
 
-import crcmod  # type: ignore
+import crcmod
 import serial
 
 from .util import AsyncioModbusClient
@@ -76,7 +76,7 @@ class TemperatureController:
                           '([0-9a-f]{8})([0-9a-f]{4})$'),
     }
 
-    def __init__(self, port: str, timeout:float = 0.5) -> None:
+    def __init__(self, port: str, timeout: float = 0.5) -> None:
         """Open up a serial connection to the controller.
 
         This device uses RS-422 instead of RS-232. You will likely need a
