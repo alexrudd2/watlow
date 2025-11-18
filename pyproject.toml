@@ -93,3 +93,4 @@ addopts = "--cov=watlow"
 [tool.pyright]
 venvPath = "."
 venv = ".venv"
+typeCheckingMode = "standard"
