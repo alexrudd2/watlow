@@ -87,8 +87,8 @@ ignore-variadic-names = true
 [tool.mypy]
 check_untyped_defs = true
 
-[tool.pytest.ini_options]
-addopts = "--cov=watlow"
+[tool.pytest]
+addopts = ["--cov"]
 
 [tool.pyright]
 venvPath = "."
