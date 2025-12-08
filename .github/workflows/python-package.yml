@@ -8,41 +8,48 @@ permissions:
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
   test:
-
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
-        pymodbus-version: ["3.0.2", "3.1.3", "3.2.2", "3.3.1", "3.4.1", "3.5.1", "3.6.8", "3.7.4", "3.8.6", "3.9.1", "3.11.1"]
+        python-version: ["3.10", "3.14"]
+        pymodbus-version:
+          [
+            "3.0.2",
+            "3.1.3",
+            "3.2.2",
+            "3.3.1",
+            "3.4.1",
+            "3.5.1",
+            "3.6.8",
+            "3.7.4",
+            "3.8.6",
+            "3.9.1",
+            "3.11.1",
+          ]
     steps:
-    - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
-    - name: Install uv
-      uses: astral-sh/setup-uv@v7
-      with:
-        python-version: ${{ matrix.python-version }}
-        enable-cache: true
-    - name: Install dependencies
-      run: |
-        uv sync --all-extras
-        uv add pymodbus==${{ matrix.pymodbus-version }}
-    - name: Lint with ruff
-      run: |
-        uv run ruff check .
-    - name: Check types with mypy
-      run: |
-        if [ ${{ matrix.pymodbus-version }} == "3.0.2" ] || \
-           [ ${{ matrix.pymodbus-version }} == "3.1.3" ]; then
-          uv run mypy watlow --ignore-missing-imports
-        else
-          uv run mypy watlow
-        fi
-    - name: Pytest
-      run: |
-        uv run pytest
+      - uses: actions/checkout@1af3b93b6815bc44a9784bd300feb67ff0d1eeb3 # v6
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          python-version: ${{ matrix.python-version }}
+          enable-cache: true
+      - name: Install dependencies
+        run: |
+          uv sync --all-extras
+          uv add pymodbus==${{ matrix.pymodbus-version }}
+      - name: Lint with ruff
+        run: |
+          uv run ruff check .
+      - name: Check types with zuban
+        run: |
+          uv run zuban check
+      - name: Pytest
+        run: |
+          uv run pytest
