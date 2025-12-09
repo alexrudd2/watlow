@@ -35,7 +35,7 @@ classifiers = [
 
 [dependency-groups]
 dev = [
-  "pytest",
+  "pytest>=9.0",
   "pytest-cov",
   "pytest-asyncio",
   "ruff==0.14.7",
