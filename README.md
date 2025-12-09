@@ -9,7 +9,7 @@ Installation
 ============
 
 ```
-uv install watlow
+uv pip install watlow
 ```
 
 Usage
@@ -80,7 +80,7 @@ finally:
 
 #### Gateway
 
-The Gateway driver uses Python ≥3.7's async/await syntax to asynchronously communicate with
+The Gateway driver uses Python async/await syntax to asynchronously communicate with
 the gateway over ModBus-TCP.
 
 ```python
