@@ -41,7 +41,7 @@ dev = [
   "pytest-asyncio",
   "ruff==0.15.8",
   "types-pyserial",
-  "zuban>=0.3.0",
+  "zuban>=0.7.0",
 ]
 
 [project.scripts]
@@ -85,7 +85,7 @@ convention = "pep257"
 [tool.ruff.lint.flake8-unused-arguments]
 ignore-variadic-names = true
 
-[tool.mypy]
+[tool.zuban]
 check_untyped_defs = true
 
 [tool.pytest]
