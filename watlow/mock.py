@@ -1,5 +1,6 @@
 """Mock Watlow interface. Use for debugging systems."""
 
+import inspect
 import struct
 from unittest.mock import MagicMock
 
@@ -15,16 +16,23 @@ except ImportError:
     except ImportError:
         from pymodbus.register_read_message import ReadHoldingRegistersResponse  # type: ignore
 
+from pymodbus.client import AsyncModbusTcpClient
+
+pymodbus33plus = not inspect.iscoroutinefunction(AsyncModbusTcpClient.close)
 class AsyncClientMock(MagicMock):
     """Magic mock that works with async methods."""
 
     async def __call__(self, *args, **kwargs):
         """Convert regular mocks into into an async coroutine."""
         return super().__call__(*args, **kwargs)
-
-    async def close(self):
-        """Close the connection."""
-        ...
+    if pymodbus33plus:
+        def close(self) -> None:  # type: ignore
+            """Close the connection."""
+            ...
+    else:
+        async def close(self) -> None:  # type: ignore
+            """Close the connection."""
+            ...
 
 
 class Gateway(realGateway):
