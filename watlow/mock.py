@@ -3,8 +3,6 @@
 import struct
 from unittest.mock import MagicMock
 
-from pymodbus.datastore import ModbusSparseDataBlock
-
 from watlow.driver import Gateway as realGateway
 
 try:
@@ -41,27 +39,13 @@ class Gateway(realGateway):
         self.output_address = 1904
         self.modbus_offset = 5000
 
-        self._registers = ModbusSparseDataBlock({})
         # Initialize each zone with 25.0 for actual/setpoint, 0.0 output
+        self._registers: dict[int, float] = {}
         for zone in range(1, 9):
             zone_offset = self.modbus_offset * (zone - 1)
-            for addr, val in [
-                (self.actual_temp_address + zone_offset, 25.0),
-                (self.setpoint_address + zone_offset, 25.0),
-                (self.output_address + zone_offset, 0.0),
-            ]:
-                hi, lo = struct.unpack('>HH', struct.pack('>f', val))
-                self._registers.setValues(addr, [hi, lo])
-
-    def _read_float(self, addr: int) -> float:
-        regs = self._registers.getValues(addr, 2)
-        assert isinstance(regs, list)
-        packed = struct.pack('>HH', regs[0], regs[1])
-        return struct.unpack('>f', packed)[0]
-
-    def _write_float(self, addr: int, val: float):
-        hi, lo = struct.unpack('>HH', struct.pack('>f', val))
-        self._registers.setValues(addr, [hi, lo])
+            self._registers[self.actual_temp_address + zone_offset] = 25.0
+            self._registers[self.setpoint_address + zone_offset] = 25.0
+            self._registers[self.output_address + zone_offset] = 0.0
 
     def _perturb(self):
         for zone in range(1, 9):
@@ -70,9 +54,9 @@ class Gateway(realGateway):
             setpoint_addr = self.setpoint_address + zone_offset
             output_addr = self.output_address + zone_offset
 
-            actual = self._read_float(actual_addr)
-            setpoint = self._read_float(setpoint_addr)
-            output = self._read_float(output_addr)
+            actual = self._registers[actual_addr]
+            setpoint = self._registers[setpoint_addr]
+            output = self._registers[output_addr]
 
             if actual < setpoint:
                 actual += 1
@@ -81,21 +65,20 @@ class Gateway(realGateway):
                 actual -= 1
                 output = 0
 
-            self._write_float(actual_addr, actual)
-            self._write_float(setpoint_addr, setpoint)
-            self._write_float(output_addr, output)
+            self._registers[actual_addr] = actual
+            self._registers[output_addr] = output
 
     async def _request(self, method, address, count, **kwargs):
         if method == 'read_holding_registers':
-            regs = self._registers.getValues(address, count)
+            val = self._registers.get(address, 0.0)
+            hi, lo = struct.unpack('>HH', struct.pack('>f', val))
             if pymodbus38plus:
-                assert isinstance(regs, list)
-                return ReadHoldingRegistersResponse(registers=regs)  # type: ignore
-            return ReadHoldingRegistersResponse(regs)  # type: ignore
+                return ReadHoldingRegistersResponse(registers=[hi, lo])  # type: ignore
+            return ReadHoldingRegistersResponse([hi, lo])  # type: ignore
 
         if method == 'write_registers':
-            for i, val in enumerate(count):
-                self._registers.setValues(address + i, val)
+            hi, lo = count[0], count[1]
+            self._registers[address] = struct.unpack('>f', struct.pack('>HH', hi, lo))[0]
             self._perturb()
             return
 
