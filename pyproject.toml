@@ -39,7 +39,7 @@ dev = [
   "pytest>=9.0",
   "pytest-cov",
   "pytest-asyncio",
-  "ruff==0.15.14",
+  "ruff==0.15.16",
   "types-pyserial",
   "zuban>=0.7.0",
 ]
